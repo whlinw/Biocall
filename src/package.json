@@ -1,0 +1,18 @@
+{
+  "name": "Biocall",
+  "productName": "Biocall",
+  "version": "0.7.0",
+  "description": "A videocall solution for physiological research",
+  "main": "./main.prod.js",
+  "author": {
+    "name": "Wei Lin",
+    "email": "whlin.w@gmail.com",
+    "url": "https://github.com/whlinw"
+  },
+  "scripts": {
+    "electron-rebuild": "node -r ../.erb/scripts/BabelRegister.js ../.erb/scripts/ElectronRebuild.js",
+    "postinstall": "yarn electron-rebuild"
+  },
+  "license": "MIT",
+  "dependencies": {}
+}

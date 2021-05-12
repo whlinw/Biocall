@@ -1,0 +1,131 @@
+.StressLevelChart {
+  position: relative;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 5px 0 5px 5px;
+  width: 200px;
+}
+
+.HeartRateChart {
+  position: relative;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 10px 0 10px 10px;
+}
+
+.chart-contain {
+  width: 270px;
+  height: 300px;
+  transition: 0.5s;
+  z-index: 10;
+  /* transition-delay: 0.5s; */
+}
+
+.chart-contain-hidden {
+  width: 50px;
+  height: 135px;
+  transition: 0;
+  transition-delay: 0;
+}
+
+.stress-level-chart-contain {
+  position: absolute;
+  top: 75px;
+  overflow: hidden;
+}
+
+.heart-rate-chart-contain {
+  position: absolute;
+  top: 400px;
+  overflow: hidden;
+}
+
+.chart-wrap {
+  width: 200px;
+  height: 300px;
+  display: flex;
+}
+
+.stress-level-chart-wrap {
+  margin-left: 20px;
+  transition: 0.5s;
+  transition-timing-function: cubic-bezier(0, 0.6, 0, 0.99);
+}
+
+.heart-rate-chart-wrap {
+  margin-left: 20px;
+  transition: 0.5s;
+  transition-timing-function: cubic-bezier(0, 0.6, 0, 0.99);
+}
+
+.chart-hidden {
+  transform: translateX(calc(-100% - 20px));
+}
+
+.chart-hidden .StressLevelChart {
+  /* transition: opacity 0.1s;
+  transition-delay: 0.1s;
+  opacity: 0; */
+}
+
+.chart-toggle-button {
+  writing-mode: vertical-rl;
+  text-align: center;
+  font-size: 20px;
+  height: 135px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.5);
+  display: inline-table;
+  box-sizing: border-box;
+  padding: 10px;
+  border-radius: 10px 0 0 10px;
+  cursor: pointer;
+  user-select: none;
+  transform: rotate(180deg);
+}
+
+.charts-side {
+  position: absolute;
+  top: max(20px, calc(30% - 182px));
+  /*top: 50px;*/
+  display: flex;
+  width: calc(40% - 50px);
+  justify-content: space-evenly;
+}
+
+.charts-side div {
+  transition: 0s;
+}
+
+.charts-side .chart-contain {
+  position: relative;
+  top: 0;
+  transition: 0s;
+  box-shadow: 0px 5px 10px 0px rgba(122, 122, 122, 0.25);
+  border-radius: 5px;
+}
+
+.charts-side .StressLevelChart {
+  background: rgba(255, 255, 255, 1);
+  width: 250px;
+  height: 375px;
+}
+
+.charts-side .chart-toggle-button {
+  display: none;
+}
+
+.charts-side .chart-wrap {
+  transform: none;
+  margin: 0;
+  width: 250px;
+  height: 375px;
+}
+
+.charts-side .chart-contain-hidden,
+.charts-side .chart-contain {
+  width: auto;
+  height: auto;
+}
+
+.charts-side .stress-level-chart-contain {
+  overflow: auto;
+}

@@ -1,0 +1,202 @@
+/*
+ * @NOTE: Prepend a `~` to css file paths that are in your node_modules
+ *        See https://github.com/webpack-contrib/sass-loader#imports
+ */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap');
+
+/*button {
+  background-color: white;
+  padding: 10px 20px;
+  margin: 10px;
+  border-radius: 10px;
+  border: none;
+  appearance: none;
+  font-size: 1.3rem;
+  box-shadow: 0px 8px 28px -6px rgba(24, 39, 75, 0.12),
+    0px 18px 88px -4px rgba(24, 39, 75, 0.14);
+  transition: transform ease-in 0.1s;
+}*/
+
+button:hover {
+  transform: scale(1.1);
+}
+
+body, html {
+  padding: 0;
+  margin: 0;
+  min-width: 400px;
+  min-height: 300px;
+  font-family: 'Segoe UI', 'Helvetica', 'Roboto', 'Open Sans';
+  background: #FAFAFA;
+}
+
+h1 {
+  margin: 0;
+  border-left: 4px solid #6979F8;
+  box-sizing: border-box;
+  padding-left: 10px;
+  color: #6979F8;
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+.select-user {
+  box-sizing: border-box;
+  padding: 20px 0;
+  border-top: 1px solid #ECE9F1;
+}
+
+.select-user h2 {
+  margin: 0;
+  padding: 20px 0;
+  font-size: 20px;
+}
+
+.user-wrap > *  {
+  display: inline-block;
+  padding: 50px;
+}
+
+.user {
+  padding: 0 10px;
+}
+
+.user-btn {
+  background: #6979F8;
+  color: #fff;
+  height: 40px;
+  border: none;
+  margin: 0;
+  padding: 0 20px;
+  border-radius: 5px;
+  width: 200px;
+  box-shadow: 0px 0px 10px 0px rgba(236,233,241,1);
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: 0.3s;
+}
+
+.user-btn:focus {
+  outline: none;
+}
+
+.user-btn:hover {
+  background: #8a98ff;
+}
+
+.connection-preparation {
+  padding: 50px;
+  margin: auto;
+  max-width: 800px;
+}
+
+.home {
+  padding: 50px;
+  margin: auto;
+  max-width: 800px;
+}
+
+#connect-status {
+  box-sizing: border-box;
+  line-height: 40px;
+  border-bottom: 1px solid #ECE9F1;
+  margin-bottom: 20px;
+}
+
+#connect-status span {
+  font-weight: bold;
+}
+
+.room-input-wrap {
+  border-bottom: 1px solid #ECE9F1;
+  box-sizing: border-box;
+  padding: 20px 0;
+}
+
+.room-input {
+  display: inline-block;
+  width: calc(100% - 250px);
+  min-width: 300px;
+}
+
+.room-input input {
+  width: 200px;
+  border: none;
+  outline: none;
+  height: 40px;
+  margin-bottom: 20px;
+  margin-right: 10px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 0px rgba(236,233,241,1);
+  box-sizing: border-box;
+  padding: 0 20px;
+}
+
+.room-join-btn {
+  background: #6979F8;
+  color: #fff;
+  height: 40px;
+  border: none;
+  margin: 0;
+  padding: 0 20px;
+  border-radius: 5px;
+  width: 200px;
+  box-shadow: 0px 0px 10px 0px rgba(236,233,241,1);
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: 0.3s;
+}
+
+.room-join-btn:focus {
+  outline: none;
+}
+
+.room-join-btn:hover {
+  background: #8a98ff;
+}
+
+.datasource {
+  box-sizing: border-box;
+  padding: 20px 0;
+  border-bottom: 1px solid #ECE9F1;
+}
+
+.datasource h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.gsr-title-wrap {
+  display: inline-block;
+  width: calc(100% - 250px);
+  min-width: 300px;
+}
+
+.gsr-title-wrap span {
+  font-weight: bold;
+}
+
+.gsr-value-box {
+  display: inline-block;
+  width: 200px;
+  height: 100%;
+  /* background: #6979F8;
+  color: #fff; */
+  text-align: center;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 0px rgba(236,233,241,1);
+  padding: 10px 0;
+  border: 2px solid #6979F8;
+  color: #6979F8;
+}
+
+.gsr-value-title {
+  font-size: 12px;
+  font-weight: lighter;
+}
+
+.gsr-value {
+  font-size: 24px;
+  font-weight: bold;
+}
+
