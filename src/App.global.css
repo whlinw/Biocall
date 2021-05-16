@@ -25,6 +25,10 @@ html {
   background: #f3f2f7;
 }
 
+.dev-server {
+  display: none;
+}
+
 .spoof-menu {
   width: 250px;
   position: fixed;

@@ -120,6 +120,9 @@ class User extends React.Component {
   }
 
   render() {
+    const serverInput = this.props.appstate.develop
+      ? ''
+      : 'dev-server';
     const resizedWindow = this.props.appstate.ui_resizedWindow
       ? 'jitsi-wrap jitsi-resized'
       : 'jitsi-wrap';
@@ -319,6 +322,7 @@ class User extends React.Component {
             <div className="room-input">
               <input
                 id="server"
+                className={serverInput}
                 type="text"
                 placeholder="Biocall server"
                 value={this.props.appstate.biocallServer}

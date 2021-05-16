@@ -36,6 +36,9 @@ class Client extends React.Component {
   }
 
   render() {
+    const serverInput = this.props.appstate.develop
+      ? ''
+      : 'dev-server';
     const visibleBorder = this.props.appstate.showClient_border
       ? this.props.appstate.borderStyle
       : { boxShadow: 'none' };
@@ -85,6 +88,7 @@ class Client extends React.Component {
             <div className="room-input">
               <input
                 id="server"
+                className={serverInput}
                 type="text"
                 placeholder="Biocall server"
                 hidden={this.props.appstate.production}

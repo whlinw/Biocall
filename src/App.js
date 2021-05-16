@@ -12,22 +12,21 @@ const fs = require('fs');
 const path = require('path');
 const OUTPUT_PATH = path.join(require('os').homedir(), 'Desktop', 'Biocall');
 
-const console = require('console'); /* [REMOVE] */
+const console = require('console');
 
 const OSC_HOST = '0.0.0.0';
 const OSC_PORT = '4559';
 
-// Create main App component
 class App extends Component {
   constructor() {
     super();
     this.state = {
-      production: false /* CHANGE TO TRUE FOR PRODUCTION */,
+      develop: true /* CHANGE TO FALSE FOR PRODUCTION */,
       user: 'guest',
       room: 'default',
       sessionName: '',
       sessionTime: 0,
-      biocallServer: 'http://127.0.0.1:4001', // http://34.91.151.45:4001
+      biocallServer: 'http://127.0.0.1:4001', /* SERVER ADDRESS */
       serverConnected: false,
       inCall: false,
       bioData_gsr: { value: 0.0, max: 0.0 },
@@ -39,7 +38,7 @@ class App extends Component {
       spoofData_gsr: -1.0,
       isSpoofed_gsr: false,
       getSpoofFromData: false,
-      spoof_gsr: { on: false, value: 1 } /* new entry for new data source */,
+      spoof_gsr: { on: false, value: 1 },
       borderStyle: { boxShadow: '0 0 40px 5px rgba(0, 0, 255, 0.75)' },
       borderColor: '#0000ff',
       showClient_border: false,
@@ -117,8 +116,8 @@ class App extends Component {
       if (this.socket) {
         this.socket.emit('gsrData', biodata);
       }
-    } else if (msg['address'] === '/test') {
-      const biodata = parseFloat(msg.args[0].value).toFixed(2); /* [TODO] Delete. Only for testing. */
+    } else if (msg['address'] === '/test') { /* Testing for input from iOS using app Clean OSC. */
+      const biodata = parseFloat(msg.args[0].value).toFixed(2); 
       if (document.getElementById('gsr-value') != null) {
         document.getElementById('gsr-value').innerHTML = biodata;
       }
@@ -278,7 +277,6 @@ class App extends Component {
   }
 
   processBioData(data) {
-    /* process GSR data */
     const gsrData = parseFloat(data['gsr']);
     this.setState((prevState) => ({
       bioData_gsr: {
@@ -303,14 +301,6 @@ class App extends Component {
       displayGSR = this.state.spoofData_gsr;
     }
 
-    // let max = this.state.displayData_gsr.max;
-    // let min = this.state.displayData_gsr.min;
-    // if (displayGSR > max) {
-    //   max = displayGSR;
-    // } else if (displayGSR < min) {
-    //   min = displayGSR;
-    // }
-
     this.setState((prevState) => ({
       displayData_gsr: {
         value: displayGSR,
@@ -318,7 +308,7 @@ class App extends Component {
         max: Math.max(displayGSR, prevState.displayData_gsr.max),
       },
     }));
-    // this.setState({displayData_gsr: {value: displayGSR, min: min, max: max}});
+
     this.setBorderStyle(this.state.displayData_gsr); /* Set border color by GSR data. */
   }
 
@@ -390,7 +380,6 @@ class App extends Component {
     this.setState({ marker: false });
   }
 
-  /* BUGGY */
   processSpoofInput(fpath) {
     this.setState({ getSpoofFromData: true }, () => {
       const data = fs.readFileSync(fpath, 'utf8').toString().split(',');
@@ -556,5 +545,4 @@ class App extends Component {
   }
 }
 
-// Export the App component
 export default App;
