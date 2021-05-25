@@ -38,7 +38,7 @@ yarn package -wm
 
 Two variables in `Biocall/src/App.js` might need to be changed during development.
 
-* `develop`: Set to false before packaging. The value indicates whether or not to hide the server address input field in the join room user interface.  
+* `develop`: Set to false before packaging. The value indicates whether or not to show the server address input field in the join room user interface.  
 * `biocallServer`: Set the value to the IP address and port of Biocall server.
 
 ```js
