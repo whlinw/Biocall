@@ -66,7 +66,6 @@ class User extends React.Component {
   handleChangeToggleSpoofGSR(event) {
     const bool = event.target.checked;
     this.props.toggleSpoofGSR(bool);
-    this.setState({ spoof: bool });
   }
 
   handleChangeSpoofValue(event, value) {
@@ -108,7 +107,7 @@ class User extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.appstate.user === 'research') {
+    if (this.props.appstate.role === 'research') {
       window.addEventListener('keydown', (event) => {
         if (event.ctrlKey && (event.key === 'Q' || event.key === 'q')) {
           this.setState((prevState) => ({
@@ -174,7 +173,7 @@ class User extends React.Component {
             <FormControlLabel
               control={
                 <Switch
-                  checked={this.state.spoof}
+                  checked={this.props.appstate.spoof_gsr.on}
                   onChange={this.handleChangeToggleSpoofGSR}
                   disabled={this.props.appstate.getSpoofFromData}
                   color="primary"
@@ -247,7 +246,7 @@ class User extends React.Component {
               marks={[
                 { value: rangeMin - 0.01, label: rangeMin },
                 { value: rangeMax + 0.01, label: rangeMax },
-                { value: this.props.appstate.bioData_gsr.value, label: '⬆︎' },
+                { value: this.props.appstate.bioData_gsr, label: '⬆︎' },
               ]}
               valueLabelDisplay="auto"
               track={false}
@@ -281,8 +280,8 @@ class User extends React.Component {
                 <div
                   className="chart-toggle-button"
                   onClick={this.props.toggleShovedStressChart}
-                >
-                  Stress level
+                > {/* [EDIT] Change chart tab name here. */}
+                  Stress level 
                 </div>
               </div>
             </div>

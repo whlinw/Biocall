@@ -1,8 +1,8 @@
 {
   "name": "Biocall",
   "productName": "Biocall",
-  "version": "1.0.0",
-  "description": "A video call solution for physiological research.",
+  "version": "1.0.1",
+  "description": "A video call solution for psychological research.",
   "main": "./main.prod.js",
   "author": {
     "name": "Wei Lin",

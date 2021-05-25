@@ -21,28 +21,28 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      develop: true /* CHANGE TO FALSE FOR PRODUCTION */,
-      user: 'guest',
+      develop: true /* ALLOW SERVER INPUT. CHANGE TO FALSE FOR PRODUCTION */,
+      role: 'guest' /* guest, client, pract, research */,
       room: 'default',
       sessionName: '',
       sessionTime: 0,
-      biocallServer: 'http://127.0.0.1:4001', /* SERVER ADDRESS */
+      biocallServer: 'http://127.0.0.1:4001' /* SERVER ADDRESS */,
       serverConnected: false,
       inCall: false,
-      bioData_gsr: { value: 0.0, max: 0.0 },
+      bioData_gsr: 0.0,
+      spoofData_gsr: -1.0,
       displayData_gsr: {
         value: 0.0,
         min: 0.0,
         max: 1.0,
-      } /* new entry for new data source */,
-      spoofData_gsr: -1.0,
+      },
       isSpoofed_gsr: false,
       getSpoofFromData: false,
-      spoof_gsr: { on: false, value: 1 },
+      spoof_gsr: { on: false, value: 1 } /* Local spoof status */,
       borderStyle: { boxShadow: '0 0 40px 5px rgba(0, 0, 255, 0.75)' },
       borderColor: '#0000ff',
       showClient_border: false,
-      showClient_stress: false /* new entry for new data source */,
+      showClient_stress: false,
       ui_resizedWindow: false,
       ui_shovedStressChart: false,
       ui_shovedHRChart: false,
@@ -54,48 +54,52 @@ class App extends Component {
       marker: false,
       dumpData: true,
       windowSize: 60,
-      windowData: { max: 1.0 },
     };
 
-    /* Binding functions for initialization */
+    /* Initialization */
+    this.setRole = this.setRole.bind(this);
     this.userSetup = this.userSetup.bind(this);
-    this.clientSetup = this.clientSetup.bind(this);
     this.userCleanup = this.userCleanup.bind(this);
-    this.clientCleanup = this.clientCleanup.bind(this);
-    this.setUser = this.setUser.bind(this);
     this.oscServerStart = this.oscServerStart.bind(this);
     this.handleOSCMessage = this.handleOSCMessage.bind(this);
     this.setBiocallServer = this.setBiocallServer.bind(this);
 
-    /* Binding functions */
+    /* Feedback */
     this.initSettings = this.initSettings.bind(this);
-    this.processBioData = this.processBioData.bind(this); /* new entry for new data source */
+    this.processBioData = this.processBioData.bind(this);
     this.processSpoofDataGSR = this.processSpoofDataGSR.bind(this);
-    this.setBorderStyle = this.setBorderStyle.bind(this);
     this.setDisplayData = this.setDisplayData.bind(this);
+    this.setBorderStyle = this.setBorderStyle.bind(this);
 
+    /* Spoof */
     this.toggleSpoofGSR = this.toggleSpoofGSR.bind(this);
     this.setSpoofGSRValue = this.setSpoofGSRValue.bind(this);
-    this.setSpoofGSRMin = this.setSpoofGSRMin.bind(this);
-    this.setGSRMin = this.setGSRMin.bind(this);
+    this.processSpoofInput = this.processSpoofInput.bind(this);
+    this.setSpoofGSRValueSequence = this.setSpoofGSRValueSequence.bind(this);
+    this.stopSpoofInput = this.stopSpoofInput.bind(this);
     this.setSpoofGSRMax = this.setSpoofGSRMax.bind(this); /* update max to server */
     this.setGSRMax = this.setGSRMax.bind(this); /* set max from server */
+    this.setSpoofGSRMin = this.setSpoofGSRMin.bind(this);
+    this.setGSRMin = this.setGSRMin.bind(this);
     this.setMarker = this.setMarker.bind(this);
 
-    this.toggleWindowSize = this.toggleWindowSize.bind(this);
-    this.toggleShovedStressChart = this.toggleShovedStressChart.bind(this);
+    /* Configure feedback */
     this.toggleShowToClientBorder = this.toggleShowToClientBorder.bind(this);
     this.toggleShowToClientStress = this.toggleShowToClientStress.bind(this);
 
-    this.processSpoofInput = this.processSpoofInput.bind(this);
-    this.stopSpoofInput = this.stopSpoofInput.bind(this);
-    this.setSpoofGSRValueSequence = this.setSpoofGSRValueSequence.bind(this);
+    /* UI change */
+    this.toggleShovedStressChart = this.toggleShovedStressChart.bind(this);
+    this.toggleWindowSize = this.toggleWindowSize.bind(this);
   }
 
-  disconnectServer() {
-    this.socket.close();
+  /* Set the role of current user. */
+  setRole(role) {
+    this.setState({ role: role }, () => {
+      console.log('Hello user:', this.state.role);
+    });
   }
 
+  /* Start the OSC server for receiving data from eSense. */
   oscServerStart() {
     this.oscPort = new osc.UDPPort({
       localAddress: OSC_HOST,
@@ -107,6 +111,7 @@ class App extends Component {
     this.oscPort.open();
   }
 
+  /* Process the received OSC message. */
   handleOSCMessage(msg) {
     if (msg['address'] === '/GSR') {
       const biodata = msg['args'][0]['value'];
@@ -127,18 +132,27 @@ class App extends Component {
     }
   }
 
+  /* Set the biocall server address. */
+  setBiocallServer(s) {
+    this.setState({ biocallServer: s });
+  }
+
+  /* Connect to the Biocall server and initialize. */
   initialize(room) {
     this.setState({ room: room });
+
+    /* Connect to server. */
     this.socket = socketIOClient(this.state.biocallServer);
 
+    /* Once connected, Initialize stuff. */
     this.socket.on('connect', () => {
       this.setState({ serverConnected: true });
       this.setState({ inCall: true });
       console.log('[Log] Connect to ' + this.state.biocallServer);
-      this.socket.emit('role', this.state.user);
+      this.socket.emit('role', this.state.role);
       this.socket.emit('joinRoom', this.state.room);
 
-      /* Set new session */
+      /* Set session start time. */
       const d = new Date();
       const h = (d.getHours() < 10 ? '0' : '') + d.getHours();
       const m = (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
@@ -146,7 +160,7 @@ class App extends Component {
       this.setState((prevState) => ({
       	sessionName: prevState.room +
           '_' +
-          prevState.user +
+          prevState.role +
           '_' +
           d.getFullYear() +
           '-' +
@@ -159,7 +173,9 @@ class App extends Component {
           s,
         sessionTime: Math.round(Date.now() / 1000),
       }));
-      if ((this.state.user === "research" || this.state.user === "user") && this.state.dumpData) {
+
+      /* Create output file. */
+      if ((this.state.role === "research" || this.state.role === "pract") && this.state.dumpData) {
         if (!fs.existsSync(OUTPUT_PATH)) {
           fs.mkdir(OUTPUT_PATH, (err) => {
             if (err) throw err;
@@ -180,7 +196,7 @@ class App extends Component {
       console.log('[Log] Disconnect from server.');
       this.setState({ serverConnected: false });
       this.setState({ inCall: false });
-      this.disconnectServer();
+      this.socket.close();
     });
 
     this.socket.on('initRoom', (data) => this.initSettings(data));
@@ -208,47 +224,42 @@ class App extends Component {
     });
   }
 
+  /* Called after user click join. */
   userSetup(room) {
     this.initialize(room);
   }
 
+  /* Called after call ends. */
   userCleanup() {
     this.socket.emit('disconnect');
     this.socket.close();
-    console.log('[Log2] Disconnect from server.');
+    console.log('[Log] Disconnect from server.');
+    this.resetStates();
+  }
+
+  /* Reset state after call ends. */
+  resetStates() {
     this.setState({ serverConnected: false });
     this.setState({ inCall: false });
+    this.setState({ bioData_gsr: {value:0.0, max:0.0} });
+    this.setState({ displayData_gsr: {
+      value: 0.0,
+      min: 0.0,
+      max: 1.0,
+    } });
+    this.setState({ spoofData_gsr: -1.0 });
+    this.setState({ isSpoofed_gsr: false });
+    this.setState({ getSpoofFromData: false });
+    this.setState({ spoof_gsr: { on: false, value: 1 } });
+    this.setState({ borderStyle: { boxShadow: '0 0 40px 5px rgba(0, 0, 255, 0.75)' } });
+    this.setState({ borderColor: '#0000ff' });
+    this.setState({ showClient_border: false });
+    this.setState({ showClient_stress: false });
+    this.setState({ userOpenChart: false });
+    this.setState({ userOpenControl: false });
   }
 
-  clientSetup(room) {
-    this.initialize(room);
-  }
-
-  clientCleanup() {
-    this.socket.emit('disconnect');
-    this.socket.close();
-    console.log('[Log2] Disconnect from server.');
-    this.setState({ serverConnected: false });
-    this.setState({ inCall: false });
-  }
-
-  setUser(user) {
-    this.setState({ user: user }, () => {
-      console.log('Hello user:', this.state.user);
-    });
-  }
-
-  setBiocallServer(s) {
-    this.setState({ biocallServer: s });
-  }
-
-  componentDidMount() {
-    const script = document.createElement('script');
-    script.src = 'https://meet.jit.si/external_api.js';
-    script.id = 'JitsiAPI';
-    document.body.appendChild(script);
-  }
-
+  /* Update local spoof and feedback configs when joining a room. */
   initSettings(data) {
     this.setState({ isSpoofed_gsr: data.spoof['gsr'].on });
     this.setState({ spoofData_gsr: data.spoof['gsr'].value });
@@ -276,25 +287,25 @@ class App extends Component {
     this.setState({ userOpenChart: data.userOpen['Chart'] });
   }
 
+  /* Process Biodata received from the server. */
   processBioData(data) {
     const gsrData = parseFloat(data['gsr']);
     this.setState((prevState) => ({
-      bioData_gsr: {
-        value: gsrData,
-        max: Math.max(prevState.bioData_gsr.max, gsrData),
-      },
+      bioData_gsr: gsrData,
     }));
     this.setDisplayData(gsrData);
     this.setState({ lastUpdateTime: Math.round(Date.now() / 1000) });
-    if ((this.state.user === "research" || this.state.user === "user") && this.state.dumpData) {
+    if ((this.state.role === "research" || this.state.role === "pract") && this.state.dumpData) {
       this.dumpData();
     }
   }
 
+  /* Process the spoof value received from the server. */
   processSpoofDataGSR(data) {
     this.setState({ spoofData_gsr: parseFloat(data) });
   }
 
+  /* Set the data to be displayed based on whether spoof function is on. */
   setDisplayData(gsrData) {
     let displayGSR = gsrData;
     if (this.state.isSpoofed_gsr && this.state.spoofData_gsr >= 0) {
@@ -309,15 +320,19 @@ class App extends Component {
       },
     }));
 
-    this.setBorderStyle(this.state.displayData_gsr); /* Set border color by GSR data. */
+    /* Set border color by the displayed GSR data. */
+    this.setBorderStyle(this.state.displayData_gsr); 
   }
 
-  /* [EDIT] Change algorithm & border color in function setBorderStyle */
+  /* [EDIT] Change algorithm & border color in the function setBorderStyle */
+  /* Set border color given the data. */
   setBorderStyle(data) {
-    let redVal = 0; /* redVal: The value of R in RGB. Default 0. */
-    let greenVal = 0; /*  greenVal: The value of G in RGB. Default 0. */
-    let blueVal = 0; /* blueVal: The value of B in RGB. Default 0. */
+    /* Default R (redVal), G (greenVal), B (blueVal) values = 0 */
+    let redVal = 0;
+    let greenVal = 0;
+    let blueVal = 0;
 
+    /* Algorithm start. Decide how redVal, greenVal, blueVal are derived here. */
     let percOfMaxVal = data.value / data.max;
     redVal = Math.floor(255 * percOfMaxVal);
     blueVal = 255 - redVal;
@@ -329,7 +344,9 @@ class App extends Component {
       redVal = 225;
       blueVal = 0;
     }
+    /* Algorithm end */
 
+    /* Set color based on RGB values. */
     this.setState({
       borderStyle: {
         boxShadow: `0 0 50px 5px rgba(${redVal}, ${greenVal}, ${blueVal}, 0.75)`,
@@ -344,6 +361,7 @@ class App extends Component {
     });
   }
 
+  /* Export data to the output file. */
   dumpData() {
     const data =
       (Math.round(Date.now()/1000) - this.state.sessionTime) +
@@ -352,7 +370,7 @@ class App extends Component {
       ',' +
       this.state.displayData_gsr.value +
       ',' +
-      this.state.bioData_gsr.value +
+      this.state.bioData_gsr +
       ',' +
       this.state.spoofData_gsr +
       ',' +
@@ -380,6 +398,19 @@ class App extends Component {
     this.setState({ marker: false });
   }
 
+  /* Set and tell server to turn on/off the spoof function. */
+  toggleSpoofGSR(bool) {
+    this.setState(
+      (prevState) => ({
+        spoof_gsr: { on: bool, value: prevState.spoof_gsr.value },
+      }),
+      () => {
+        this.socket.emit('spoofGSR', bool);
+      }
+    );
+  }
+
+  /* Process the spoof values from a input file. */
   processSpoofInput(fpath) {
     this.setState({ getSpoofFromData: true }, () => {
       const data = fs.readFileSync(fpath, 'utf8').toString().split(',');
@@ -387,14 +418,19 @@ class App extends Component {
     });
   }
 
-  stopSpoofInput() {
-    this.setState({ getSpoofFromData: false });
+  /* Set and send to server a spoof value. */
+  setSpoofGSRValue(value) {
+    this.setState(
+      (prevState) => ({
+        spoof_gsr: { on: prevState.spoof_gsr.on, value: value },
+      }),
+      () => {
+        this.socket.emit('spoofValueGSR', value);
+      }
+    );
   }
 
-  toggleSpoofGSR(bool) {
-    this.socket.emit('spoofGSR', bool);
-  }
-
+  /* Set and send a sequence of spoof values. */
   setSpoofGSRValueSequence(seq) {
     if (this.state.getSpoofFromData) {
       const value = parseFloat(seq.shift());
@@ -407,21 +443,17 @@ class App extends Component {
     }
   }
 
-  setSpoofGSRValue(value) {
-    this.setState(
-      (prevState) => ({
-        spoof_gsr: { on: prevState.spoof_gsr.on, value: value },
-      }),
-      () => {
-        this.socket.emit('spoofValueGSR', value);
-      }
-    );
+  /* Stop sending the spoof value squence. */
+  stopSpoofInput() {
+    this.setState({ getSpoofFromData: false });
   }
 
+  /* Tell server the manual setted minimum GSR value. */
   setSpoofGSRMin(value) {
     this.socket.emit('spoofMinGSR', value);
   }
 
+  /* Set the local minumum GSR value. */
   setGSRMin(value) {
     this.setState((prevState) => ({
       displayData_gsr: {
@@ -432,10 +464,12 @@ class App extends Component {
     }));
   }
 
+  /* Tell server the manual setted maximum GSR value. */
   setSpoofGSRMax(value) {
     this.socket.emit('spoofMaxGSR', value);
   }
 
+  /* Set the local maximum GSR value. */
   setGSRMax(value) {
     this.setState((prevState) => ({
       displayData_gsr: {
@@ -446,10 +480,12 @@ class App extends Component {
     }));
   }
 
+  /* Set marker. */
   setMarker() {
     this.setState({ marker: true });
   }
 
+  /* Tell server to enable/disable client border. */
   toggleShowToClientBorder() {
     this.setState(
       (prevState) => ({ showClient_border: !prevState.showClient_border }),
@@ -459,6 +495,7 @@ class App extends Component {
     );
   }
 
+  /* Tell server to enable/disable client GSR chart. */
   toggleShowToClientStress() {
     this.setState(
       (prevState) => ({ showClient_stress: !prevState.showClient_stress }),
@@ -468,28 +505,37 @@ class App extends Component {
     );
   }
 
-  toggleWindowSize() {
-    this.setState(
-      (prevState) => ({ ui_resizedWindow: !prevState.ui_resizedWindow }),
-      () => {
-        if (this.state.user === 'user') {
-          this.socket.emit('userOpenControl', this.state.ui_resizedWindow);
-        }
-      }
-    );
-  }
-
+  /* Open local chart. */
   toggleShovedStressChart() {
     this.setState(
       (prevState) => ({
         ui_shovedStressChart: !prevState.ui_shovedStressChart,
       }),
       () => {
-        if (this.state.user === 'user') {
+        if (this.state.role === 'pract') {
           this.socket.emit('userOpenChart', this.state.ui_shovedStressChart);
         }
       }
     );
+  }
+
+  /* Open local control panel. */
+  toggleWindowSize() {
+    this.setState(
+      (prevState) => ({ ui_resizedWindow: !prevState.ui_resizedWindow }),
+      () => {
+        if (this.state.role === 'pract') {
+          this.socket.emit('userOpenControl', this.state.ui_resizedWindow);
+        }
+      }
+    );
+  }
+
+  componentDidMount() {
+    const script = document.createElement('script');
+    script.src = 'https://meet.jit.si/external_api.js';
+    script.id = 'JitsiAPI';
+    document.body.appendChild(script);
   }
 
   render() {
@@ -499,28 +545,28 @@ class App extends Component {
           <Route
             path="/"
             exact
-            render={() => <Home handler={this.setUser} />}
+            render={() => <Home handler={this.setRole} />}
           />
           <Route
             path="/user"
             exact
             render={() => (
               <User
+                appstate={this.state}
+                setBiocallServer={this.setBiocallServer}
                 setup={this.userSetup}
                 cleanup={this.userCleanup}
-                appstate={this.state}
+                setMarker={this.setMarker}
                 toggleSpoofGSR={this.toggleSpoofGSR}
                 setSpoofGSRValue={this.setSpoofGSRValue}
-                setSpoofGSRMin={this.setSpoofGSRMin}
-                setSpoofGSRMax={this.setSpoofGSRMax}
-                toggleWindowSize={this.toggleWindowSize}
-                toggleShovedStressChart={this.toggleShovedStressChart}
-                toggleShowToClientBorder={this.toggleShowToClientBorder}
-                toggleShowToClientStress={this.toggleShowToClientStress}
-                setBiocallServer={this.setBiocallServer}
                 processSpoofInput={this.processSpoofInput}
                 stopSpoofInput={this.stopSpoofInput}
-                setMarker={this.setMarker}
+                setSpoofGSRMin={this.setSpoofGSRMin}
+                setSpoofGSRMax={this.setSpoofGSRMax}
+                toggleShowToClientBorder={this.toggleShowToClientBorder}
+                toggleShowToClientStress={this.toggleShowToClientStress}
+                toggleWindowSize={this.toggleWindowSize}
+                toggleShovedStressChart={this.toggleShovedStressChart}
               />
             )}
           />
@@ -529,16 +575,16 @@ class App extends Component {
             exact
             render={() => (
               <Client
-                oscSetup={this.oscServerStart}
-                setup={this.clientSetup}
-                cleanup={this.clientCleanup}
                 appstate={this.state}
-                toggleShovedStressChart={this.toggleShovedStressChart}
                 setBiocallServer={this.setBiocallServer}
+                oscSetup={this.oscServerStart}
+                setup={this.userSetup}
+                cleanup={this.userCleanup}
+                toggleShovedStressChart={this.toggleShovedStressChart}
               />
             )}
           />
-          <Route path="" exact render={() => <Home handler={this.setUser} />} />
+          <Route path="" exact render={() => <Home handler={this.setRole} />} />
         </Switch>
       </div>
     );

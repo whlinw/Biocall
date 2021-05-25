@@ -15,7 +15,7 @@ class StressLevelChart extends React.Component {
         labels: [ '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         datasets: [
           {
-            label: 'Stress level', /* [EDIT] Change label name here. */
+            label: 'Stress level', /* [EDIT] Change legend name here. */
             fill: true,
             backgroundColor: gradient,
             borderColor: 'rgba(116,0,255,1)',
